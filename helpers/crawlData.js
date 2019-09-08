@@ -1,30 +1,60 @@
 const cheerio = require('cheerio');
 const axios = require('axios');
 const fs = require('fs');
+//const IncomeStatement = require('./IncomeStatement');
 const lineReader = require('line-reader');
 const srcTemp = "temp.txt";
 let tempArray = [];
-let incomeStatement = {
-    time: '',
-    totalRevenue: '',
-    grossProfit: '',
-    operatingIncome: '',
-    netIncome: '',
+let incomeStatements = []
+
+class IncomeStatement {
+    constructor (time, totalRevenue,grossProfit,operatingIncome,netIncome) {
+        this.time = time;
+        this.grossProfit = grossProfit;
+        this.totalRevenue = totalRevenue;
+        this.operatingIncome = operatingIncome;
+        this.netIncome = netIncome;
+    }
 }
 
-let balanceSheet = {
-    time: '',
-    totalAssests: '',
-    totalLiabilities: '',
-    totalEquity: ''
+class BalanceSheet {
+    constructor (time, totalAssests,totalLiabilities,totalEquity) {
+        this.time = time;
+        this.totalAssests = totalAssests;
+        this.totalLiabilities = totalLiabilities;
+        this.totalEquity = totalEquity;
+    }
 }
 
-let cashFlowStatement = {
-    time: '',
-    cashFromOperatingActivity: '',
-    cashFromInvestingActivity: '',
-    cashFromFinancingActivity: '',
-    netChangeInCash: '',
+class CashFlowStatement {
+    constructor (time, cashFromOperatingActivity,cashFromInvestingActivity,cashFromFinancingActivity,netChangeInCash) {
+        this.time = time;
+        this.cashFromOperatingActivity = cashFromOperatingActivity;
+        this.cashFromInvestingActivity = cashFromInvestingActivity;
+        this.cashFromFinancingActivity = cashFromFinancingActivity;
+        this.netChangeInCash = netChangeInCash;
+    }
+}
+
+
+const formatArray = (array) => {
+    let temp = [];
+    for (let i = 0; i < array.length; i++) {
+        let e = array[i].trim();
+        if (e !== '') {
+            temp.push(e);
+        };
+    }
+    return temp;
+}
+
+const get4ElementInArray = (array, firstIndex, lastIndex) => {
+    let temp = [];
+    for (let i = firstIndex; i < lastIndex; i++) {
+        const element = array[i];
+        temp.push(element);
+    }
+    return temp;
 }
 
 const crawlData = (url) => {
@@ -37,38 +67,6 @@ const crawlData = (url) => {
                 reject(error);
             })
     });
-}
-
-
-const get4ElementInArray = (array, firstIndex, lastIndex) => {
-    let temp = [];
-    for (let i = firstIndex; i < lastIndex; i++) {
-        const element = array[i];
-        temp.push(element);
-    }
-    return temp;
-}
-
-const findAllIndexesInArray = (array, keyword) => {
-    let temp = [];
-    for (let i = 0; i < array.length; i++) {
-        const e = array[i];
-        if (e === keyword) {
-            temp.push(i);
-        }
-    }
-    return temp;
-}
-
-const formatArray = (array) => {
-    let temp = [];
-    for (let i = 0; i < array.length; i++) {
-        let e = array[i].trim();
-        if (e !== '') {
-            temp.push(e);
-        };
-    }
-    return temp;
 }
 
 async function execute() {
@@ -89,7 +87,7 @@ async function execute() {
         let financeData = companyFinancialSummaryTbl.split('\n');
         financeData = formatArray(financeData);
 
-        const indexPeriod = findAllIndexesInArray(financeData, 'Period Ending:');
+        let firstIndexPeriod = financeData.indexOf('Period Ending:') +1;
         let firstIndexTotalRevenue = financeData.indexOf('Total Revenue') + 1;
         let firstIndexGrossProfit = financeData.indexOf('Gross Profit') + 1;
         let firstIndexNetIncome = financeData.indexOf('Net Income') + 1;
@@ -113,11 +111,35 @@ async function execute() {
         let cashFromFinancingActivitiesIn4Quarter = get4ElementInArray(financeData, firstIndexCashFromFinancingActivities, firstIndexCashFromFinancingActivities + 4);
         let netChangeinCashIn4Quarter = get4ElementInArray(financeData, firstIndexNetChangeinCash, firstIndexNetChangeinCash + 4);
         let totalEquityIn4Quarter = get4ElementInArray(financeData, firstIndexTotalEquity, firstIndexTotalEquity + 4);
-        
-        let periodIncomeStatement = get4ElementInArray(financeData)
+        let periodTime = get4ElementInArray(financeData, firstIndexPeriod, firstIndexPeriod + 4);
 
-        console.log(findAllIndexesInArray(financeData, 'Period Ending:'))
-        
+        // Add incomestatement data
+        for (let i = 0; i < 4; i++) {
+            let incomeStatement = new IncomeStatement(
+                periodTime[i],
+                totalRevenueIn4Quarter[i],
+                grossProfitIn4Quarter[i],
+                netIncomeIn4Quarter[i],
+                operatingIncomeIn4Quarter[i]
+            )
+
+            incomeStatements.push(incomeStatement);
+        }
+
+        // Add BalanceSheet data
+        for (let i = 0; i < 4; i++) {
+            let BalanceSheet = new IncomeStatement(
+                periodTime[i],
+                totalRevenueIn4Quarter[i],
+                grossProfitIn4Quarter[i],
+                netIncomeIn4Quarter[i],
+                operatingIncomeIn4Quarter[i]
+            )
+
+            incomeStatements.push(incomeStatement);
+        }
+
+        console.log(incomeStatements)
 
         date = new Date();
         endingTime = date.getTime();
