@@ -3,18 +3,23 @@ module.exports = (incomestatement, balanceSheet, cashFlowStatement) => {
     for (let i = 0; i < 4; i++) {
         var date = new Date(incomestatement[i].time);
         time = date.getDate() + '/' + date.getMonth() + '/' + date.getFullYear();
-        dataQuater.push(time)
-        dataQuater.push(incomestatement[i].totalRevenue)
-        dataQuater.push(incomestatement[i].grossProfit)
-        dataQuater.push(incomestatement[i].operatingIncome)
-        dataQuater.push(incomestatement[i].netIncome)
-        dataQuater.push(balanceSheet[i].totalAssests)
-        dataQuater.push(balanceSheet[i].totalLiabilities)
-        dataQuater.push(balanceSheet[i].totalEquity)
-        dataQuater.push(cashFlowStatement[i].cashFromOperatingActivity)
-        dataQuater.push(cashFlowStatement[i].cashFromInvestingActivity)
-        dataQuater.push(cashFlowStatement[i].cashFromFinancingActivity)
-        dataQuater.push(cashFlowStatement[i].netChangeInCash)
+        dataQuater.push(time);
+        dataQuater.push(isNumber(incomestatement[i].totalRevenue));
+        dataQuater.push(isNumber(incomestatement[i].grossProfit));
+        dataQuater.push(isNumber(incomestatement[i].operatingIncome));
+        dataQuater.push(isNumber(incomestatement[i].netIncome));
+        dataQuater.push(isNumber(balanceSheet[i].totalAssests));
+        dataQuater.push(isNumber(balanceSheet[i].totalLiabilities));
+        dataQuater.push(isNumber(balanceSheet[i].totalEquity));
+        dataQuater.push(isNumber(cashFlowStatement[i].cashFromOperatingActivity));
+        dataQuater.push(isNumber(cashFlowStatement[i].cashFromInvestingActivity));
+        dataQuater.push(isNumber(cashFlowStatement[i].cashFromFinancingActivity));
+        dataQuater.push(isNumber(cashFlowStatement[i].netChangeInCash));
     }
     return dataQuater;
+}
+
+function isNumber(value) {
+    if (isNaN(value))  return 0;
+    return value;
 }
